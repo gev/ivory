@@ -23,8 +23,6 @@ module Ivory.Opts.SanityCheck
   , showDupDefs
   ) where
 
-import           System.IO                               (hPutStrLn, stderr)
-
 import           Control.Monad                           (unless)
 import qualified Data.List                               as L
 import qualified Data.Map                                as M
@@ -33,7 +31,7 @@ import           MonadLib                                (Id, StateM (..),
                                                           WriterT, runId,
                                                           runStateT, runWriterT,
                                                           sets_)
-
+import           System.IO                               (hPutStrLn, stderr)
 import           Text.PrettyPrint                        hiding ((<>))
 
 import qualified Ivory.Language.Array                    as I
@@ -71,7 +69,7 @@ showError err = case err of
       $$ text "but is used with type:"
       $$ nest 4 (quotes (pretty expected))
 
-showSanityChkModule :: ModResult Result -> IO ()
+showSanityChkModule :: ModResult Result -> Doc
 showSanityChkModule res = showModErrs go res
   where
   go :: Result -> Doc
@@ -171,10 +169,11 @@ sanityCheck ms = map goMod ms
                     | m <- ms
                     ]
 
-showDupDefs :: [String] -> IO ()
+showDupDefs :: [String] -> Doc
 showDupDefs dups =
-  if null dups then return ()
-    else hPutStrLn stderr $ render (vcat (map docDups dups) $$ empty)
+  case dups of
+    [] -> empty
+    _  -> vcat (map docDups dups)
   where
   docDups x = (text "*** WARNING" <> colon)
           <+> quotes (text x)
