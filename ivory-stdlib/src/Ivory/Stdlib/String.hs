@@ -127,14 +127,14 @@ stringData x = toCArray (x ~> stringDataL)
 -- | Binding to the C "memcmp" function.
 memcmp :: Def ('[ ConstRef s1 ('CArray ('Stored Uint8))
                 , ConstRef s2 ('CArray ('Stored Uint8))
-                , Len] ':-> Len)
+                , Len] :-> Len)
 memcmp = importProc "memcmp" "string.h"
 
 -- XXX don't export
 -- | Binding to the C "memcpy" function.
 memcpy :: Def ('[ Ref      s1 ('CArray ('Stored Uint8))
                 , ConstRef s2 ('CArray ('Stored Uint8))
-                , Len] ':-> Len)
+                , Len] :-> Len)
 memcpy = importProc "memcpy" "string.h"
 
 -- | Return the length of a string.
@@ -158,7 +158,7 @@ do_istr_eq :: Def ('[ ConstRef s1 ('CArray ('Stored Uint8))
                     , Len
                     , ConstRef s2 ('CArray ('Stored Uint8))
                     , Len
-                    ] ':-> IBool)
+                    ] :-> IBool)
 do_istr_eq = proc "ivory_string_eq" $ \s1 len1 s2 len2 -> body $
   ifte_ (len1 ==? len2)
     (do r <- call memcmp s1 s2 len1
@@ -183,7 +183,7 @@ istr_eq s1 s2 = do
 string_copy_z :: Def ('[ Ref s1 ('CArray ('Stored Uint8))
                        , Len
                        , ConstRef s2 ('CArray ('Stored Uint8))
-                       , Len] ':-> Len)
+                       , Len] :-> Len)
 string_copy_z = importProc "ivory_stdlib_string_copy_z"
                            "ivory_stdlib_string_prim.h"
 

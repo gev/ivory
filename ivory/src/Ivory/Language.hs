@@ -8,7 +8,7 @@
 module Ivory.Language (
     -- * Kinds
     Area(..)
-  , Proc(..)
+  , Proc((:->)), (:->)
 
     -- * Types
   , IvoryType(), IvoryArea()
