@@ -1,6 +1,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -102,5 +104,5 @@ instance IvoryStore Sint32
 instance IvoryStore Sint64
 
 -- Only allow global nullable pointers to be stored in structures.
-instance (KnownConstancy c, IvoryArea a) =>
-         IvoryStore (Pointer 'Nullable c 'Global a)
+instance (KnownConstancy c, IvoryArea a, n ~ 'Nullable, s ~ 'Global) =>
+         IvoryStore (Pointer n c s a)
