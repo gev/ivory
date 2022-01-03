@@ -340,7 +340,11 @@ toExpr t exp = case exp of
                                    return $ index i' a'
   I.ExpToIx e i              -> toExpr t e
   I.ExpSafeCast t' e         -> do e' <- toExpr t' e
-                                   assertBoundedVar t e'
+                                   -- Used to be
+                                   -- assertBoundedVar t e'
+                                   -- but for float test2 it generated
+                                   -- wrong `ASSERT int32(var0)` where var0 was REAL variable
+                                   assertBoundedVar t' e'
                                    return e'
   I.ExpOp op args            -> toExprOp t op args
   I.ExpAddrOfGlobal s        -> var <$> lookupVar s
