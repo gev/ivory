@@ -424,12 +424,31 @@ divExp v a b
   z = intLit 0
   o = intLit 1
 
+----------------------------------------
+-- Div for REALs
+
+divAbsReal :: Func
+divAbsReal = "divReal"
+
+divFuncReal :: Statement
+divFuncReal = Statement $ B.unwords
+  [ B.pack divAbsReal, ":", "(REAL, REAL)", "->", "REAL" ]
+
+divExpReal :: Expr -> Expr -> Expr -> Expr
+divExpReal v a b
+  =   ((b .== o) .=> (v .== a))
+  .&& ((a .== z) .=> (v .== z))
+  .&& (((a .>= o) .&& (b .> o)) .=> ((v .>= z) .&& (v .< a)))
+  where
+  z = intLit 0
+  o = intLit 1
+
 
 cvc4Lib :: [Statement]
 cvc4Lib =
   [ word8Bound, word16Bound, word32Bound, word64Bound
   , int8Bound,  int16Bound,  int32Bound,  int64Bound
-  , modFunc, mulFunc, divFunc
+  , modFunc, mulFunc, divFunc, divFuncReal
   ]
 
 --------------------------------------------------------------------------------

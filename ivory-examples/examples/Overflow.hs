@@ -23,7 +23,9 @@ ovf3  = proc "ovf3" $ \ n m o -> body $ do
   ret $ (o ? (n / m, m / n))
 
 cmodule :: Module
-cmodule = package "Overflow" $ --incl ovf1 >> incl ovf2 >> 
+cmodule = package "Overflow" $ do
+    incl ovf1
+    incl ovf2
     incl ovf3
 
 writeOverflow :: Opts -> IO ()
