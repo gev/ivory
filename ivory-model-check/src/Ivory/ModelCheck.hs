@@ -86,6 +86,16 @@ modelCheck args mods (I.DefProc p) = do
   file <- writeInput bs
   out  <- reverse <$> runCVC4 args file
   case out of
+   -- since cvc4 1.8 / cvc5 we have entailed / not_entailed instead of valid / invalid
+   ("entailed":_) -> return (Inconsistent file)
+   ("not_entailed":results)
+     | all (=="entailed") results -> return Safe
+     | otherwise -> return (Unsafe bad file)
+     where
+       bad = [ B.unpack $ concrete q
+             | (q, "not_entailed") <- zip (tail $ allQueries st) results
+             ]
+   -- older cvc4
    ("valid":_) -> return (Inconsistent file)
    ("invalid":results)
      | all (=="valid") results -> return Safe
