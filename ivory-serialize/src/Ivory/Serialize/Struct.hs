@@ -29,10 +29,10 @@ packLabel' label rep = PackLabel $ PackRep
 
 packStruct :: [PackLabel sym] -> PackRep ('Struct sym)
 packStruct labels = PackRep
-  { packGetLE = foldPackLabels packGetLE labels
-  , packGetBE = foldPackLabels packGetBE labels
-  , packSetLE = foldPackLabels packSetLE labels
-  , packSetBE = foldPackLabels packSetBE labels
+  { packGetLE = foldPackLabels (\rep buf offs str -> packGetLE rep buf offs str) labels
+  , packGetBE = foldPackLabels (\rep buf offs str -> packGetBE rep buf offs str) labels
+  , packSetLE = foldPackLabels (\rep buf offs str -> packSetLE rep buf offs str) labels
+  , packSetBE = foldPackLabels (\rep buf offs str -> packSetBE rep buf offs str) labels
   , packSize = sum $ map (\ (PackLabel rep) -> packSize rep) labels
   }
 
