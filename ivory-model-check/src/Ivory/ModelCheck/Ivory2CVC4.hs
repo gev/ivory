@@ -437,6 +437,13 @@ toMul t e0 e1 = do
   return v'
 
 toDiv :: I.Type -> I.Expr -> I.Expr -> ModelCheck Expr
+toDiv t@I.TyFloat e0 e1 = do
+  v <- incReservedVar =<< toType t
+  a <- toExpr t e0
+  b <- toExpr t e1
+  let v' = var v
+  addInvariant (v' .== call divAbsReal [a, b] .&& divExpReal v' a b)
+  return v'
 toDiv t e0 e1 = do
   v <- incReservedVar =<< toType t
   a <- toExpr t e0
