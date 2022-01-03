@@ -21,6 +21,7 @@ Please cite this paper for when citing the language.
 
 * `ivory`: the Ivory language implementation and interpreter
 * `ivory-backend-c`: a backend for compiling Ivory programs to C
+* `ivory-eval`: native evaluation of Ivory programs
 * `ivory-examples`: sample Ivory programs
 * `ivory-opts`: an optimization framework and some optimization
   implementations, for the Ivory AST.
@@ -29,6 +30,10 @@ Please cite this paper for when citing the language.
 * `ivory-hw`: a macro language library for writing hardware drivers
   in Ivory.
 * `ivory-model-check`: a backend for verifying Ivory programs with CVC4
+* `ivory-quickcheck`: QuickCheck driver for ivory
+* `ivory-serialize`: binary serialization support for Ivory data types
+* `ivory-stdlib`: Ivory standard library
+* `ivory-tasty`: unit testing helpers for testing Ivory programs
 
 ## Usage
 
