@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase                 #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
@@ -184,7 +185,11 @@ ivoryMod  modName incls = do
     nm       <- stringE modName
     let pkg   = AppE (VarE 'I.package) nm
     let doblk = map (NoBindS . ivorySymMod) incls
+#if MIN_VERSION_template_haskell(2,17,0)
+    return (AppE pkg (DoE Nothing doblk))
+#else
     return (AppE pkg (DoE doblk))
+#endif
 
   mkModTy = return $ SigD (mkName modName) (ConT ''I.Module)
 

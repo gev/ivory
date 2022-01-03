@@ -225,7 +225,11 @@ fromProcType retTy procName args = do
 #endif
 
 
+#if MIN_VERSION_template_haskell(2,17,0)
+  allTyVars = nub . (map (\t -> PlainTV (tyVar t) SpecifiedSpec))
+#else
   allTyVars = nub . (map (PlainTV . tyVar))
+#endif
   allCtxs   = nub . (concatMap mkCxt)
 
 --------------------------------------------------------------------------------
