@@ -1,3 +1,5 @@
+[![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fdistrap%2Fivory%2Fbadge&style=flat-square)](https://github.com/distrap/ivory/actions/workflows/ci.yaml)
+
 # [Ivory][ivory]
 
 Ivory is an embedded domain specific language (EDSL) which aims to provide
