@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP             #-}
 {-# LANGUAGE QuasiQuotes     #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -39,7 +40,11 @@ import           Ivory.Language.Syntax.Concrete.QQ.TypeQQ
 fromProgram :: [Stmt] -> Q T.Exp
 fromProgram program =
   if null program then [| return () |]
+#if MIN_VERSION_template_haskell(2,17,0)
+    else  return . DoE Nothing =<< (runToSt $ forM_ program fromStmt)
+#else
     else  return . DoE =<< (runToSt $ forM_ program fromStmt)
+#endif
 
 fromBlock :: [Stmt] -> TStmtM T.Exp
 fromBlock = liftQ . fromProgram
