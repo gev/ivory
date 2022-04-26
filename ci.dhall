@@ -8,8 +8,8 @@ in    haskellCi.generalCi
           # haskellCi.matrixSteps
         )
         ( Some
-            { ghc = [ haskellCi.GHC.GHC8104 ]
-            , cabal = [ haskellCi.Cabal.Cabal32 ]
+            { ghc = [ haskellCi.GHC.GHC8107 ]
+            , cabal = [ haskellCi.Cabal.Cabal34 ]
             }
         )
     : haskellCi.CI.Type
