@@ -37,6 +37,7 @@ import Ivory.Language.Scope
 import qualified Ivory.Language.Syntax as I
 import Ivory.Language.Type
 
+import Data.Kind (Type)
 
 -- References ------------------------------------------------------------------
 
@@ -55,7 +56,7 @@ type ConstRef = Pointer 'Valid 'Const
 -- Dereferencing ---------------------------------------------------------------
 
 -- | TODO remove class, leave function only
-class IvoryRef (ref :: RefScope -> Area * -> *) where
+class IvoryRef (ref :: RefScope -> Area Type -> Type) where
   unwrapRef
     :: IvoryVar a
     => ref s ('Stored a) -> I.Expr

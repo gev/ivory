@@ -7,6 +7,8 @@
 
 module Ivory.Language.MemArea where
 
+import Data.Kind (Type)
+
 import Ivory.Language.Area
 import Ivory.Language.Init
 import Ivory.Language.Proxy
@@ -69,7 +71,7 @@ areaInit s ini = runAreaInitM s (runInit (getInit ini))
 -- Memory Areas ----------------------------------------------------------------
 
 -- | Externally defined memory areas.
-data MemArea (area :: Area *)
+data MemArea (area :: Area Type)
   = MemImport I.AreaImport
   | MemArea I.Area [I.Area]
   deriving (Eq, Show)
@@ -100,10 +102,11 @@ makeArea sym isConst ty ini = I.Area
   }
 
 setAreaAttributes :: [I.AreaAttribute] -> I.Area -> I.Area
-setAreaAttributes attrs area = area { I.areaAttrs = attrs }
+setAreaAttributes attrs area' = area' { I.areaAttrs = attrs }
 
 setMemAreaAttributes :: [I.AreaAttribute] -> MemArea area -> MemArea area
 setMemAreaAttributes attrs (MemArea a1 as) = MemArea (setAreaAttributes attrs a1) as
+setMemAreaAttributes _ memImport = memImport
 
 -- | Define a global constant. Requires an IvoryZero constraint to ensure the
 -- area has an initializers, but does not explicilty initialize to 0 so that the
@@ -132,7 +135,7 @@ importArea name header = MemImport I.AreaImport
 
 -- Constant Memory Areas -------------------------------------------------------
 
-newtype ConstMemArea (area :: Area *) = ConstMemArea (MemArea area)
+newtype ConstMemArea (area :: Area Type) = ConstMemArea (MemArea area)
 
 -- | Constant memory area definition.
 constArea :: forall area. IvoryArea area
@@ -155,7 +158,7 @@ importConstArea name header = ConstMemArea $ MemImport I.AreaImport
 -- Area Usage ------------------------------------------------------------------
 
 -- | Turn a memory area into a reference.
-class IvoryAddrOf (mem :: Area * -> *) ref | mem -> ref, ref -> mem  where
+class IvoryAddrOf (mem :: Area Type -> Type) ref | mem -> ref, ref -> mem  where
   addrOf :: IvoryArea area => mem area -> ref 'Global area
 
 -- XXX do not export

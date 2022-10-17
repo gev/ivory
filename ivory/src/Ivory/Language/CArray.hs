@@ -9,6 +9,7 @@
 
 module Ivory.Language.CArray where
 
+import Data.Kind (Type)
 import Ivory.Language.Area
 import Ivory.Language.Proxy
 import Ivory.Language.Ref
@@ -24,7 +25,7 @@ instance IvoryArea a => IvoryArea ('CArray a) where
 
 -- | Guard invocations of toCArray.
 class (IvoryArea area, IvoryArea rep)
-  => ToCArray (area :: Area *) (rep :: Area *) | area -> rep
+  => ToCArray (area :: Area Type) (rep :: Area Type) | area -> rep
 
 instance (ANat len, ToCArray area rep)
     => ToCArray ('Array len area) ('CArray rep)

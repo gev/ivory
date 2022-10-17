@@ -3,12 +3,14 @@
 
 module Ivory.Language.SizeOf where
 
+import Data.Kind (Type)
+
 import Ivory.Language.Area
 import Ivory.Language.Proxy
 import qualified Ivory.Language.Syntax as AST
 import Ivory.Language.Type
 
-class IvorySizeOf (t :: Area *) where
+class IvorySizeOf (t :: Area Type) where
 
 instance IvorySizeOf ('Struct sym) where
 instance (ANat len, IvorySizeOf area) => IvorySizeOf ('Array len area) where
