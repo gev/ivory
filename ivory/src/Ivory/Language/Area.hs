@@ -10,12 +10,13 @@ import Ivory.Language.Proxy
 import Ivory.Language.Type
 import qualified Ivory.Language.Syntax as I
 
+import Data.Kind (Type)
 import GHC.TypeLits (Nat, Symbol)
 
 -- Memory Areas ----------------------------------------------------------------
 
 -- | Type proxies for @Area@s.
-type AProxy a = Proxy (a :: Area *)
+type AProxy a = Proxy (a :: Area Type)
 
 -- | The kind of memory-area types.
 data Area k
@@ -26,7 +27,7 @@ data Area k
     -- ^ This is lifting for a *-kinded type
 
 -- | Guard the inhabitants of the Area type, as not all *s are Ivory *s.
-class IvoryArea (a :: Area *) where
+class IvoryArea (a :: Area Type) where
   ivoryArea :: Proxy a -> I.Type
 
 instance (ANat len, IvoryArea area)

@@ -31,6 +31,8 @@ import           Ivory.Language.Type
                  (IvoryExpr, IvoryType, IvoryVar, ivoryType, unwrapExpr,
                   wrapExpr, wrapVar, wrapVarExpr)
 
+import qualified Data.Kind
+
 -- * Nullability
 data Nullability
   = Nullable -- ^ may be NULL
@@ -60,7 +62,7 @@ instance KnownConstancy 'Mutable where
   demoteConstancy _ = Mutable
 
 -- * Generic Pointer
-data Pointer (n :: Nullability) (c :: Constancy) (s :: RefScope) (a :: Area *) = Pointer
+data Pointer (n :: Nullability) (c :: Constancy) (s :: RefScope) (a :: Area Data.Kind.Type) = Pointer
   { getPointer :: Expr
   }
 
@@ -99,7 +101,7 @@ nullPtr = Pointer (ExpLit LitNull)
 -- | Safe pointer casting. Only defined if conversion is safe.
 class PointerCast n1 c1 n2 c2 where
   pointerCast
-    :: forall (s :: RefScope) (a :: Area *).
+    :: forall (s :: RefScope) (a :: Area Data.Kind.Type).
        IvoryArea a
     => Pointer n1 c1 s a -> Pointer n2 c2 s a
 

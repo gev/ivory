@@ -28,7 +28,7 @@ import           Ivory.Language.Type
 import           Ivory.Language.Uint
 
 import           Control.Monad          (forM_)
-
+import           Data.Kind              (Type)
 import           GHC.TypeLits           (Symbol)
 
 -- Initializers ----------------------------------------------------------------
@@ -49,11 +49,11 @@ initType (IArray  ty _ _) = ty
 initType (IStruct ty _)   = ty
 initType (IFresh  ty _ _) = ty
 
-newtype Init (area :: Area *) = Init { getInit :: XInit }
+newtype Init (area :: Area Type) = Init { getInit :: XInit }
 
 -- | Zero initializers. The semantics of Ivory is that initializers must be
 -- compatible with C semantics of initializing to 0 for globals in .bss.
-class IvoryZero (area :: Area *) where
+class IvoryZero (area :: Area Type) where
   izero :: Init area
 
 -- | Zero the memory pointed to by this reference, as long as it could have been

@@ -14,13 +14,14 @@
 
 module Ivory.Language.Proc where
 
+import Data.Kind (Type)
+
 import Ivory.Language.Monad
 import Ivory.Language.Proxy
 import Ivory.Language.Type
 import Ivory.Language.Effects
 import qualified Ivory.Language.Effects as E
 import qualified Ivory.Language.Syntax as AST
-
 
 -- Function Type ---------------------------------------------------------------
 
@@ -29,7 +30,7 @@ data Proc k = [k] :-> k
 
 -- | Typeclass for procedure types, parametrized over the C procedure's
 -- signature, to produce a value representing their signature.
-class ProcType (sig :: Proc *) where
+class ProcType (sig :: Proc Type) where
 
   -- | Turn a type-level description of the signature into a (return
   -- type, [argument types]) value.
@@ -52,7 +53,7 @@ instance (IvoryType a, ProcType (args ':-> r))
 -- Function Pointers -----------------------------------------------------------
 
 -- | Procedure pointers
-newtype ProcPtr (sig :: Proc *) = ProcPtr { getProcPtr :: AST.Name }
+newtype ProcPtr (sig :: Proc Type) = ProcPtr { getProcPtr :: AST.Name }
 
 instance ProcType proc => IvoryType (ProcPtr proc) where
   ivoryType _ = AST.TyProc r args
@@ -72,7 +73,7 @@ procPtr  = ProcPtr . defSymbol
 -- Function Symbols ------------------------------------------------------------
 
 -- | Procedure definitions.
-data Def (proc :: Proc *)
+data Def (proc :: Proc Type)
   = DefProc AST.Proc
   | DefImport AST.Import
     deriving (Show, Eq, Ord)
@@ -156,7 +157,7 @@ data Definition = Defined CodeBlock
 --   value, or else a Haskell function type whose arguments correspond
 --   to the C arguments and whose return type is @Body r@ on the return
 --   type @r@.
-class ProcType proc => IvoryProcDef (proc :: Proc *) impl | impl -> proc where
+class ProcType proc => IvoryProcDef (proc :: Proc Type) impl | impl -> proc where
   procDef :: Closure -> Proxy proc -> impl -> ([AST.Var], Definition)
 
 -- Base case: No arguments in C signature
@@ -253,7 +254,7 @@ indirect ptr = callAux (getProcPtr ptr) (Proxy :: Proxy proc) []
 -- 'IvoryProcDef'), parameter 'eff' is the effect context (which
 -- remains unchanged through the calls here), and parameter 'impl', as
 -- in 'IvoryProcDef', is the implementation type.
-class IvoryCall (proc :: Proc *) (eff :: E.Effects) impl
+class IvoryCall (proc :: Proc Type) (eff :: E.Effects) impl
     | proc eff -> impl, impl -> eff where
 
   -- | Recursive helper call.  'proc' encodes a C procedure type, and
@@ -302,7 +303,7 @@ indirect_ ptr = callAux_ (getProcPtr ptr) (Proxy :: Proxy proc) []
 
 -- | Typeclass for something callable in Ivory without a return value
 -- needed.  This is otherwise identical to 'IvoryCall'.
-class IvoryCall_ (proc :: Proc *) (eff :: E.Effects) impl
+class IvoryCall_ (proc :: Proc Type) (eff :: E.Effects) impl
     | proc eff -> impl, impl -> eff
   where
   callAux_ :: AST.Name -> Proxy proc -> [AST.Typed AST.Expr] -> impl

@@ -14,6 +14,7 @@
 
 module Ivory.Language.BitData.BitData where
 
+import Data.Kind (Type)
 import Ivory.Language.Bits
 import Ivory.Language.Proxy
 import Ivory.Language.Cast
@@ -27,7 +28,7 @@ class (ANat (BitSize (BitType a)),
        BitType a ~ Bits (BitSize (BitType a))) => BitData a where
   -- | Return the base "(Bits n)" type as defined in the "bitdata"
   -- quasiquoter.
-  type BitType a :: *
+  type BitType a :: Type
 
   -- | Convert a bit data type to its raw bit value.  This is always
   -- well defined and should be exported.

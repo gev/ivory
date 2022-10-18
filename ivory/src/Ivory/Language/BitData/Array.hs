@@ -14,13 +14,15 @@
 
 module Ivory.Language.BitData.Array where
 
+import Data.Kind (Type)
+import GHC.TypeLits(Nat)
+
 import Ivory.Language.Bits
 import Ivory.Language.Proxy
 
 import Ivory.Language.BitData.Bits
 import Ivory.Language.BitData.BitData
 
-import GHC.TypeLits(Nat)
 
 -- NOTE: This type family is used to calculate the total size of a bit
 -- array by multiplying "n" by the size of "a" in bits.  Once we have
@@ -29,7 +31,7 @@ import GHC.TypeLits(Nat)
 -- The quasiquoter may generate multiple instances of "ArraySize" with
 -- the same "n", "a" and result, which is allowed by the type family
 -- overlapping rules.  It does seem like a bit of a hack though.
-type family ArraySize (n :: Nat) (a :: *) :: Nat
+type family ArraySize (n :: Nat) (a :: Type) :: Nat
 
 -- | An array of "n" bit data elements of type "a".
 data BitArray (n :: Nat) a = BitArray { unArray :: Bits (ArraySize n a) }

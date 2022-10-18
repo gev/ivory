@@ -18,6 +18,7 @@
 
 module Ivory.Language.BitData.Bits where
 
+import Data.Kind (Type)
 import GHC.TypeLits
 import Ivory.Language.Uint
 import Ivory.Language.Bits
@@ -35,7 +36,7 @@ import Ivory.Language.BitData.DefBitRep
 -- | Type function: "BitRep (n :: Nat)" returns an Ivory type given a
 -- bit size as a type-level natural.  Instances of this type family
 -- for bits [1..64] are generated using Template Haskell.
-type family BitRep (n :: Nat) :: *
+type family BitRep (n :: Nat) :: Type
 
 defBitRep ''BitRep ''Uint8  [1..8]
 defBitRep ''BitRep ''Uint16 [9..16]

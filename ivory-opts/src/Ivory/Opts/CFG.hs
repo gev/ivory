@@ -242,7 +242,6 @@ cfg m = G.insEdges (concatMap go nodes) $ G.insNodes nodes G.empty
                 | ((i,p):_) <- ls
                 , procSym p == sym = Just i
                 | (_:ls') <- ls    = lookup ls' sym
-                | otherwise        = error "Unreachable in cfg" -- To make GHC happy.
 
 -- | Just label the nodes with the function names.
 procSymGraph :: CFG -> G.Gr CallNm ()

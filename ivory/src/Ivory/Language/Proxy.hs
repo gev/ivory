@@ -20,11 +20,12 @@ module Ivory.Language.Proxy
   , fromTypeSym
   ) where
 
+import Data.Kind    (Type)
 import Data.Proxy   (Proxy (..))
 import GHC.TypeLits (KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal)
 
 -- | Type proxies for * types.
-type SProxy a = Proxy (a :: *)
+type SProxy a = Proxy (a :: Type)
 
 type ANat    n = KnownNat n
 type NatType n = Proxy n
