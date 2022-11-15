@@ -41,6 +41,7 @@ jobs:
         ghc:
           - '8.10.7'
           - '9.0.2'
+          - '9.2.4'
 name: Haskell CI
 on:
   - push
