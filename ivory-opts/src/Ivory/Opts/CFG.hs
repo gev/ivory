@@ -29,7 +29,9 @@ import qualified Ivory.Language.Syntax.AST  as I
 import qualified Ivory.Language.Syntax.Type as I
 import qualified Data.Graph.Inductive as G
 
+#if !MIN_VERSION_base(4,18,0)
 import Control.Applicative (liftA2)
+#endif
 import System.FilePath
 import Data.Maybe
 import Data.List (find,(\\))
