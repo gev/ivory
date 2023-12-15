@@ -4,6 +4,7 @@
 {-# LANGUAGE DeriveTraversable    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Ivory.Opts.CSE (cseFold) where
@@ -20,6 +21,7 @@ import qualified Data.IntSet           as IntSet
 import           Data.List             (sort)
 import           Data.Map.Strict       (Map)
 import qualified Data.Map.Strict       as Map
+import qualified Data.Maybe
 import           Data.Reify
 import           Ivory.Language.Array  (ixRep)
 import qualified Ivory.Language.Syntax as AST
@@ -390,6 +392,11 @@ reconstruct (Graph subexprs root) = D.toList rootBlock
   (_, remap, (_, blockFacts)) =
     foldr (dedup usedOnce) mempty
       $ subexprs ++ [ (constUnique c, constExpr c) | c <- [minBound..maxBound] ]
-  Just rootGen = IntMap.lookup (IntMap.findWithDefault root root remap) blockFacts
+  rootGen =
+    Data.Maybe.fromMaybe
+      (error "No root found")
+      $ IntMap.lookup
+          (IntMap.findWithDefault root root remap)
+          blockFacts
   (((), Bindings { unusedBindings = usedOnce }), rootBlock) =
     runM rootGen $ Bindings Map.empty IntSet.empty 0
