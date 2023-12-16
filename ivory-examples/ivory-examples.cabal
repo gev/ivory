@@ -47,13 +47,9 @@ executable ivory-c-clang-test
                       , String
   hs-source-dirs:       examples
   build-depends:        base >= 4.7 && < 5,
-                        pretty >= 1.1,
                         monadLib >= 3.7,
-                        template-haskell >= 2.8,
                         ivory,
-                        ivory-opts,
                         ivory-backend-c,
-                        ivory-stdlib,
-                        QuickCheck
+                        ivory-stdlib
   default-language:     Haskell2010
   ghc-options:        -Wall
