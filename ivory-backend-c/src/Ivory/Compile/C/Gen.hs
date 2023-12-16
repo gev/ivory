@@ -251,7 +251,7 @@ toBody ens stmt =
       -> [C.BlockDecl $
       case inits of
         I.InitStruct []
-          -> [cdecl| $ty:(toType t) $id:(toVar var); |]
+          -> [cdecl| $ty:(toType t) $id:(toVar var) = {0}; |]
         _ -> [cdecl| $ty:(toType t) $id:(toVar var)
                 = $init:(toInit inits); |]
       ]
