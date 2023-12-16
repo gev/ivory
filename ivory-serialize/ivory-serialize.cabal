@@ -28,8 +28,6 @@ library
                         Paths_ivory_serialize
 
   build-depends:        base >= 4.7 && < 5,
-                        filepath,
-                        monadLib,
                         ivory,
                         ivory-artifact
 

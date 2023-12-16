@@ -19,8 +19,6 @@ source-repository    this
 library
   exposed-modules:      Ivory.QuickCheck
   build-depends:        base >= 4.7 && < 5,
-                        monadLib,
-                        random,
                         QuickCheck >= 2.7,
                         ivory,
                         ivory-backend-c,
