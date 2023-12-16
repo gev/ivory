@@ -1,4 +1,4 @@
-[![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fdistrap%2Fivory%2Fbadge&style=flat-square)](https://github.com/distrap/ivory/actions/workflows/ci.yaml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/distrap/ivory/ci.yaml?branch=main)](https://github.com/distrap/ivory/actions/workflows/ci.yaml)
 
 # [Ivory][ivory]
 
