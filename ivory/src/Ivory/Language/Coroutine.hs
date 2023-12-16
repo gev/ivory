@@ -37,6 +37,7 @@ import           Control.Monad.Fix      (mfix)
 import qualified Data.DList             as D
 import qualified Data.IntMap            as IntMap
 import qualified Data.Map               as Map
+import qualified Data.Maybe
 import           Ivory.Language.Area
 import           Ivory.Language.Array
 import           Ivory.Language.Effects
@@ -215,10 +216,12 @@ stateType :: AST.Type
 stateType = AST.TyWord AST.Word32
 
 data BasicBlock = BasicBlock AST.Block Terminator
+  deriving Show
 type Goto = Int
 data Terminator
   = BranchTo Bool Goto
   | CondBranchTo AST.Expr BasicBlock BasicBlock
+  deriving Show
 
 joinTerminators :: BasicBlock -> BasicBlock
 joinTerminators (BasicBlock b (CondBranchTo cond t f)) =
@@ -230,7 +233,17 @@ joinTerminators bb = bb
 
 doInline :: Goto -> [(Goto, BasicBlock)] -> [(Goto, BasicBlock)]
 doInline inlineLabel blocks = do
-  let Just (BasicBlock newStmts tgt) = lookup inlineLabel blocks
+  let (BasicBlock newStmts tgt) =
+        Data.Maybe.fromMaybe
+          ( error
+            $ "No BasicBlock found for inline label "
+            <> show inlineLabel
+            <> " in blocks "
+            <> show blocks
+          )
+          $ lookup
+              inlineLabel
+              blocks
   let inlineBlock (BasicBlock b (BranchTo False dst))
         | dst == inlineLabel = BasicBlock (b ++ newStmts) tgt
       inlineBlock (BasicBlock b (CondBranchTo cond tb fb))
@@ -247,8 +260,17 @@ keepUsedBlocks root blocks = sweep $ snd $ MonadLib.runM (mark root >> ref root)
     seen <- MonadLib.get
     ref label
     unless (label `IntMap.member` seen) $ do
-      let Just b = lookup label blocks
-      markBlock b
+      markBlock
+        $ Data.Maybe.fromMaybe
+            ( error
+              $ "Can't lookup label "
+              <> show label
+              <> " in blocks "
+              <> show blocks
+            )
+            $ lookup
+                label
+                blocks
   ref label = MonadLib.sets_ $ IntMap.insertWith (+) label 1
   markBlock (BasicBlock _ (BranchTo suspend label)) = do
     mark label
@@ -314,9 +336,8 @@ extractLocals (AST.Call ty mvar name args) rest
   -- 'yieldName' is the pseudo-function call which we handle specially at this
   -- point using 'addYield':
   | name == AST.NameSym yieldName = do
-      -- XXX: yield takes no arguments and always returns something
-      let (Just var, []) = (mvar, args)
-      addYield ty var rest
+      when (args /= mempty) $ error "Coroutine yield takes no arguments"
+      addYield ty mvar rest
   | otherwise = do
       -- All other function calls pass through normally, but have their
       -- arguments run through 'updateTypedExpr' and have their results saved
@@ -331,7 +352,10 @@ extractLocals (AST.Call ty mvar name args) rest
       rest
 extractLocals (AST.Local ty var initex) rest = do
   cont <- addLocal ty var
-  let AST.VarName varStr = var
+  let varStr =
+        case var of
+          AST.VarName n -> n
+          x -> error $ "Expected VarName but got " <> show x
   let ref = AST.VarName $ varStr ++ "_ref"
   initex' <- runUpdateExpr $ updateInit initex
   stmts
@@ -347,7 +371,11 @@ extractLocals (AST.RefZero ty ref) rest =
   (runUpdateExpr $ AST.RefZero ty <$> updateExpr ref) >>=
   stmt >> rest
 extractLocals (AST.AllocRef _ty refvar name) rest = do
-  let AST.NameVar var = name -- XXX: AFAICT, AllocRef can't have a NameSym argument.
+  -- XXX: AFAICT, AllocRef can't have a NameSym argument.
+  let var =
+        case name of
+          AST.NameVar n -> n
+          x -> error $ "Expected NameVar but got " <> show x
   refvar `rewriteTo` contRef var
   rest
 extractLocals (AST.Loop _ var initEx incr b) rest = do
@@ -404,13 +432,12 @@ resumeAt :: Goto -> CoroutineMonad Terminator
 resumeAt = return . BranchTo True
 
 contRef :: AST.Var -> CoroutineMonad AST.Expr
-contRef var = do
-  let AST.VarName varStr = var
+contRef (AST.VarName varStr) = do
   MonadLib.asks getCont <*> pure varStr
+contRef x = error $ "Expected VarName but got " <> show x
 
 addLocal :: AST.Type -> AST.Var -> CoroutineMonad AST.Expr
-addLocal ty var = do
-  let AST.VarName varStr = var
+addLocal ty var@(AST.VarName varStr) = do
   MonadLib.lift $ MonadLib.put (D.singleton $ AST.Typed ty varStr, mempty)
   cont <- contRef var
   var `rewriteTo` do
@@ -420,13 +447,15 @@ addLocal ty var = do
     stmt $ AST.Deref ty var' cont
     return $ AST.ExpVar var'
   return cont
+addLocal _ty var = error $ "Expected VarName but got " <> show var
 
 -- | Generate the code to turn a @yield@ pseudo-call to a suspend and resume.
-addYield :: AST.Type -> AST.Var -> CoroutineMonad Terminator ->
-            CoroutineMonad Terminator
-addYield ty var rest = do
-  let AST.TyRef derefTy = ty
-      AST.VarName varStr = var
+addYield
+  :: AST.Type
+  -> Maybe AST.Var
+  -> CoroutineMonad Terminator
+  -> CoroutineMonad Terminator
+addYield (AST.TyRef derefTy) (Just var@(AST.VarName varStr)) rest = do
   MonadLib.lift $ MonadLib.put
     (D.singleton $ AST.Typed derefTy varStr, mempty)
   cont <- contRef var
@@ -435,6 +464,8 @@ addYield ty var rest = do
   let resume arg = [AST.RefCopy derefTy cont arg]
   MonadLib.lift $ MonadLib.put (mempty, Map.singleton after resume)
   resumeAt after
+addYield _ Nothing _ = error "Coroutine yield always returns something"
+addYield t _ _ = error $ "Got wrong type as input for addYield: " <> show t
 
 setBreakLabel :: Terminator -> CoroutineMonad a -> CoroutineMonad a
 setBreakLabel label m = do

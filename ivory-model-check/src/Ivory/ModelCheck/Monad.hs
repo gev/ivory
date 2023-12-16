@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -214,8 +215,9 @@ snapshotRefs :: ModelCheck ()
 snapshotRefs = do
   rs <- getRefs
   b  <- symCond <$> get
-  forM_ (M.toList rs) $ \ ((t,r),[v]) ->
-    updateStReturnRef t r b v
+  forM_ (M.toList rs) $ \case
+    ((t,r),[v]) -> updateStReturnRef t r b v
+    x -> error $ "Expected ((t, r), [v]) but got " <> show x
 
 getStructs :: ModelCheck (M.Map I.Sym I.Struct)
 getStructs = do
@@ -230,7 +232,7 @@ addStruct s = do
              I.Abstract n _ -> n
   let st' = st { symStructs = M.insert nm s (symStructs st) }
   set st'
-  
+
 updateStRef :: I.Type -> Var -> Var -> ModelCheck ()
 updateStRef t v v' =
   sets_ (\st -> st { symRefs = M.insert (t,v) [v'] (symRefs st) })

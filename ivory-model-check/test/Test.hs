@@ -79,32 +79,36 @@ testArgs :: Args
 testArgs = initArgs { printQuery = False, printEnv = False }
 
 mkSuccess :: Def p -> [Module] -> TestTree
-mkSuccess d@(~(I.DefProc p)) mods = testCase (I.procSym p) $ do
+mkSuccess d@(I.DefProc p) mods = testCase (I.procSym p) $ do
   r <- modelCheck testArgs mods d
   let msg = printf "Expected: Safe\nActual: %s"
             (showResult r)
   assertBool msg (isSafe r)
+mkSuccess _ _ = error "Absurd"
 
 mkSuccessInline :: Def p -> [Module] -> TestTree
-mkSuccessInline d@(~(I.DefProc p)) mods = testCase (I.procSym p) $ do
+mkSuccessInline d@(I.DefProc p) mods = testCase (I.procSym p) $ do
   r <- modelCheck (testArgs { inlineCall = True }) mods d
   let msg = printf "Expected: Safe\nActual: %s"
             (showResult r)
   assertBool msg (isSafe r)
+mkSuccessInline _ _ = error "Absurd"
 
 mkFailure :: Def p -> [Module] -> TestTree
-mkFailure d@(~(I.DefProc p)) mods = testCase (I.procSym p) $ do
+mkFailure d@(I.DefProc p) mods = testCase (I.procSym p) $ do
   r <- modelCheck testArgs mods d
   let msg = printf "Expected: Unsafe\nActual: %s"
             (showResult r)
   assertBool msg (isUnsafe r)
+mkFailure _ _ = error "Absurd"
 
 mkNotError :: Def p -> [Module] -> TestTree
-mkNotError d@(~(I.DefProc p)) mods = testCase (I.procSym p) $ do
+mkNotError d@(I.DefProc p) mods = testCase (I.procSym p) $ do
   r <- modelCheck testArgs mods d
   let msg = printf "Expected: anything but Error\nActual: %s"
             (showResult r)
   assertBool msg (not $ isError r)
+mkNotError _ _ = error "Absurd"
 
 --------------------------------------------------------------------------------
 -- test modules

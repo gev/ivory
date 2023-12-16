@@ -37,6 +37,8 @@ import           System.Directory                        (createDirectoryIfMissi
 import           System.Environment                      (getArgs)
 import           System.FilePath                         (addExtension, (</>))
 
+import qualified Data.Maybe
+
 -- Code Generation Front End ---------------------------------------------------
 
 compile :: [Module] -> [Located Artifact] -> IO ()
@@ -73,7 +75,10 @@ stdoutmodules cmodules =
 outputmodules :: Opts -> [C.CompileUnits] -> [Located Artifact] -> IO ()
 outputmodules opts cmodules user_artifacts = do
   -- Irrrefutable pattern checked above
-  let Just srcdir = outDir opts
+  let srcdir =
+        Data.Maybe.fromMaybe
+          (error "Impossible")
+          $ outDir opts
   let incldir = hdrDir srcdir
   let rootdir = rootDir srcdir
   createDirectoryIfMissing True rootdir

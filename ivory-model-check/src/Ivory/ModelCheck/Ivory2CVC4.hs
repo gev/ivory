@@ -13,7 +13,7 @@ import           Prelude                ()
 import           Prelude.Compat         hiding (exp)
 
 
-import           Control.Monad          (forM, forM_, void, when)
+import           Control.Monad          (forM, forM_, void)
 import           Data.List              (nub)
 import qualified Data.Map               as M
 import           Data.Maybe
@@ -191,7 +191,9 @@ toInit ty init =
        _           -> return $ intLit 0
     I.InitExpr t exp -> toExpr t exp
     I.InitArray is _ -> do
-      let (I.TyArr k t) = ty
+      let (k, t) = case ty of
+            I.TyArr k t -> (k, t)
+            x -> error $ "Expected I.TyArr but got " <> show x
       tv <- fmap var $ incReservedVar =<< toType ty
       forM_ (zip [0..] is) $ \ (ix,i) -> do
         e <- toInit t i
@@ -199,7 +201,9 @@ toInit ty init =
       return tv
     I.InitStruct fs  -> do
       tv <- fmap var $ incReservedVar =<< toType ty
-      let (I.TyStruct s) = ty
+      let s = case ty of
+                I.TyStruct s -> s
+                x -> error $ "Expected I.TyStruct but got " <> show x
       forM_ fs $ \ (f, i) -> do
         structs <- getStructs
         case M.lookup s structs >>= lookupField f of
@@ -309,10 +313,12 @@ toIfTE ens cond blk0 blk1 = do
   trs <- runBranch b blk0
   frs <- runBranch (not' b) blk1
   forM_ (M.toList (M.unionWith (++) trs frs)) $ \ ((t, r), nub -> vs) -> do
-    when (length vs == 2) $ do
-      r' <- addEnvVar t r
-      let [tv,fv] = vs
-      addInvariant $ (b .=> (var r' .== var tv)) .&& (not' b .=> (var r' .== var fv))
+    case vs of
+      [tv, fv] -> do
+        r' <- addEnvVar t r
+        let [tv,fv] = vs
+        addInvariant $ (b .=> (var r' .== var tv)) .&& (not' b .=> (var r' .== var fv))
+      _ -> pure ()
   where
   runBranch b blk = withLocalRefs $ inBranch b $ do
     mapM_ (toBody ens) blk       -- Body under the invariant
