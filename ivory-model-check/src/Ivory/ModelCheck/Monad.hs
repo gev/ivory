@@ -39,12 +39,6 @@ module Ivory.ModelCheck.Monad
   )
  where
 
-import Prelude ()
-import Prelude.Compat hiding (exp)
-#if !MIN_VERSION_base(4,11,0)
-import Data.Semigroup (Semigroup(..))
-#endif
-
 import           Control.Monad (unless,forM_)
 import           Data.List (stripPrefix)
 import           Data.Maybe (fromMaybe,isJust)
@@ -190,12 +184,12 @@ addType ty fs = do
 
 addInvariant :: Expr -> ModelCheck ()
 addInvariant T   = return ()
-addInvariant exp = do
+addInvariant expr = do
   st  <- get
   loc <- getSrcLoc
   let b = symCond st
   let ps = symSt st
-  let ps' = ps { invars = (b .=> exp) `at` loc : invars ps }
+  let ps' = ps { invars = (b .=> expr) `at` loc : invars ps }
   set st { symSt = ps' }
 
 -- getProgramSt :: ModelCheck ProgramSt
@@ -283,21 +277,21 @@ setQueries q = do
 
 addQuery :: Expr -> ModelCheck ()
 addQuery T = return ()
-addQuery exp = do
+addQuery expr = do
   st  <- getState
   loc <- getSrcLoc
   let b = symCond st
   q   <- getQueries
-  setQueries q { assertQueries = (b .=> exp) `at` loc : assertQueries q }
+  setQueries q { assertQueries = (b .=> expr) `at` loc : assertQueries q }
 
 addEnsure :: Expr -> ModelCheck ()
 addEnsure T = return ()
-addEnsure exp = do
+addEnsure expr = do
   st  <- getState
   loc <- getSrcLoc
   let b = symCond st
   q   <- getQueries
-  setQueries q { ensureQueries = (b .=> exp) `at` loc : ensureQueries q }
+  setQueries q { ensureQueries = (b .=> expr) `at` loc : ensureQueries q }
 
 addProc :: IsDefined -> I.Proc -> ModelCheck ()
 addProc d p = do

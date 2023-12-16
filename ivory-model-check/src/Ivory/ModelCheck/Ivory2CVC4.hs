@@ -9,10 +9,6 @@ module Ivory.ModelCheck.Ivory2CVC4
 --  ( modelCheckMod )
  where
 
-import           Prelude                ()
-import           Prelude.Compat         hiding (exp)
-
-
 import           Control.Monad          (forM, forM_, void)
 import           Data.List              (nub)
 import qualified Data.Map               as M
@@ -28,11 +24,6 @@ import           Ivory.Opts.Overflow    (overflowFold)
 
 import           Ivory.ModelCheck.CVC4
 import           Ivory.ModelCheck.Monad
-
--- XXX testing
--- import           Debug.Trace
-
---------------------------------------------------------------------------------
 
 modelCheckProc :: [I.Module] -> I.Proc -> ModelCheck ()
 modelCheckProc mods p = do
@@ -102,10 +93,10 @@ toEnsure (I.Ensure cond) = toAssertion id cond
 
 toAssertion :: (I.Expr -> I.Expr) -> I.Cond -> ModelCheck Expr
 toAssertion trans cond = case cond of
-    I.CondBool exp -> toExpr I.TyBool (trans exp)
-    I.CondDeref t exp var c -> do
-      e <- toExpr t exp
-      toAssertion (subst [(var, exp)] . trans) c
+    I.CondBool expr -> toExpr I.TyBool (trans expr)
+    I.CondDeref t expr var c -> do
+      e <- toExpr t expr
+      toAssertion (subst [(var, expr)] . trans) c
 
 --------------------------------------------------------------------------------
 
@@ -114,22 +105,22 @@ toAssertion trans cond = case cond of
 toBody :: [I.Ensure] -> I.Stmt -> ModelCheck ()
 toBody ens stmt =
   case stmt of
-    I.IfTE exp blk0 blk1   -> toIfTE ens exp blk0 blk1
-    I.Assume exp           -> addInvariant =<< toExpr I.TyBool exp
-    I.Assert exp           -> addQuery =<< toExpr I.TyBool exp
-    I.CompilerAssert exp   -> addQuery =<< toExpr I.TyBool exp
+    I.IfTE expr blk0 blk1   -> toIfTE ens expr blk0 blk1
+    I.Assume expr           -> addInvariant =<< toExpr I.TyBool expr
+    I.Assert expr           -> addQuery =<< toExpr I.TyBool expr
+    I.CompilerAssert expr   -> addQuery =<< toExpr I.TyBool expr
     I.Return (I.Typed t e) -> snapshotRefs >> toReturn ens t e
     I.ReturnVoid           -> snapshotRefs >> return ()
     I.Deref t v ref        -> toDeref t v ref
-    I.Store t ptr exp      -> toStore t ptr exp
-    I.RefCopy t ptr exp    -> toStore t ptr exp -- XXX is this correct?
-    I.Assign t v exp       -> toAssign t v exp
+    I.Store t ptr expr      -> toStore t ptr expr
+    I.RefCopy t ptr expr    -> toStore t ptr expr -- XXX is this correct?
+    I.Assign t v expr       -> toAssign t v expr
     I.Call t retV nm args  -> toCall t retV nm args
     I.Local t v inits      -> toLocal t v inits
 
     I.AllocRef t ref name  -> toAlloc t ref name
 
-    I.Loop m v exp inc blk -> toLoop ens m v exp inc blk
+    I.Loop m v expr inc blk -> toLoop ens m v expr inc blk
     I.Comment (I.SourcePos src)
       -> setSrcLoc src
     I.Comment _            -> return ()
@@ -140,11 +131,11 @@ toBody ens stmt =
     I.RefZero t ptr        -> err "refZero" (show stmt)
 
 toReturn :: [I.Ensure] -> I.Type -> I.Expr -> ModelCheck ()
-toReturn ens t exp = do
-  e <- toExpr t exp
+toReturn ens t expr = do
+  e <- toExpr t expr
   v <- addEnvVar t "retval"
   addInvariant (var v .== e)
-  queryEnsures ens t exp
+  queryEnsures ens t expr
 
 toDeref :: I.Type -> I.Var -> I.Expr -> ModelCheck ()
 toDeref t v ref = do
@@ -160,18 +151,18 @@ toAlloc t ref name = do
   addInvariant (var v' .== var n')
 
 toStore :: I.Type -> I.Expr -> I.Expr -> ModelCheck ()
-toStore t e@(I.ExpIndex{}) exp = toSelectStore t e exp
-toStore t e@(I.ExpLabel{}) exp = toSelectStore t e exp
-toStore t ptr exp = do
+toStore t e@(I.ExpIndex{}) expr = toSelectStore t e expr
+toStore t e@(I.ExpLabel{}) expr = toSelectStore t e expr
+toStore t ptr expr = do
   v' <- updateEnvRef t ptr
-  e  <- toExpr t exp
+  e  <- toExpr t expr
   addInvariant (var v' .== e)
 
 toSelectStore :: I.Type -> I.Expr -> I.Expr -> ModelCheck ()
-toSelectStore t f exp = do
+toSelectStore t f expr = do
   f'   <- toExpr t f
   v    <- toStoreRef t f
-  e    <- toExpr t exp
+  e    <- toExpr t expr
   addInvariant (var v .== store f' e)
 
 toLocal :: I.Type -> I.Var -> I.Init -> ModelCheck ()
@@ -189,7 +180,7 @@ toInit ty init =
        I.TyStruct _-> fmap var $ incReservedVar =<< toType ty
        I.TyBool    -> return false
        _           -> return $ intLit 0
-    I.InitExpr t exp -> toExpr t exp
+    I.InitExpr t expr -> toExpr t expr
     I.InitArray is _ -> do
       let (k, t) = case ty of
             I.TyArr k t -> (k, t)
@@ -218,8 +209,8 @@ toInit ty init =
   lookupField f (I.Abstract _ _) = Nothing
 
 toAssign :: I.Type -> I.Var -> I.Expr -> ModelCheck ()
-toAssign t v exp = do
-  e  <- toExpr t exp
+toAssign t v expr = do
+  e  <- toExpr t expr
   v' <- addEnvVar t (toVar v)
   addInvariant (var v' .== e)
 
@@ -327,7 +318,7 @@ toIfTE ens cond blk0 blk1 = do
 --------------------------------------------------------------------------------
 
 toExpr :: I.Type -> I.Expr -> ModelCheck Expr
-toExpr t exp = case exp of
+toExpr t expr = case expr of
   I.ExpSym s                 -> return (var s)
   I.ExpVar v                 -> var <$> lookupVar (toVar v)
   I.ExpLit lit               ->

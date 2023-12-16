@@ -7,12 +7,6 @@
 
 module Ivory.ModelCheck.CVC4 where
 
-import Prelude ()
-import Prelude.Compat hiding (exp)
-#if !MIN_VERSION_base(4,11,0)
-import Data.Monoid.Compat ((<>))
-#endif
-
 import qualified Data.ByteString.Char8 as B
 import           Data.Int
 import           Data.List             (intersperse)
@@ -63,10 +57,10 @@ instance Concrete Statement where
   concrete (TypeDecl ty fs)
     = statement [CL ty, clBS ":", clBS "TYPE", clBS "= [#", fieldList fs, clBS "#]"]
   concrete (VarDecl v ty)  = statement [CL v, clBS ":", CL ty]
-  concrete (Assert (Located loc exp))
-    = statement [clBS "ASSERT", CL exp, clBS ";\t %", CL loc]
-  concrete (Query (Located loc exp))
-    = statement [clBS "QUERY", CL exp, clBS ";\t %", CL loc]
+  concrete (Assert (Located loc expr))
+    = statement [clBS "ASSERT", CL expr, clBS ";\t %", CL loc]
+  concrete (Query (Located loc expr))
+    = statement [clBS "QUERY", CL expr, clBS ";\t %", CL loc]
   concrete (Statement a)   = statement [CL a]
 
 statement :: [ConcreteList] -> B.ByteString
@@ -184,8 +178,8 @@ substExpr su = go
   go e           = e
 
 leaf :: Expr -> Bool
-leaf exp =
-  case exp of
+leaf expr =
+  case expr of
     (Var _)    -> True
     T          -> True
     F          -> True
@@ -193,10 +187,10 @@ leaf exp =
     _          -> False
 
 parens :: Expr -> B.ByteString
-parens exp =
-  if leaf exp
-    then concrete exp
-    else  '(' `B.cons` (concrete exp `B.snoc` ')')
+parens expr =
+  if leaf expr
+    then concrete expr
+    else  '(' `B.cons` (concrete expr `B.snoc` ')')
 
 instance Concrete Expr where
   concrete (Var v)       = concrete v
@@ -326,12 +320,12 @@ boundedFunc :: forall a . (Integral a, Bounded a)
 boundedFunc f _sz = Statement $ B.unwords
   [ B.pack f, ":", "INT", "->", "BOOLEAN"
   , "=", "LAMBDA", "(x:INT)", ":"
-  , exp (toInt minBound) (toInt maxBound)
+  , expr (toInt minBound) (toInt maxBound)
   ]
   where
   toInt a = fromIntegral (a :: a)
   x = var "x"
-  exp l h = concrete $ (intLit l .<= x) .&& (x .<= intLit h)
+  expr l h = concrete $ (intLit l .<= x) .&& (x .<= intLit h)
 
 word8, word16, word32, word64, int8, int16, int32, int64 :: Func
 word8  = "word8"

@@ -4,9 +4,6 @@
 
 module Ivory.ModelCheck where
 
-import Prelude ()
-import Prelude.Compat
-
 import qualified Ivory.Language.Proc         as I
 import qualified Ivory.Language.Syntax       as I
 import           Ivory.Language.Syntax.Concrete.Location
