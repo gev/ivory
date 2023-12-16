@@ -43,9 +43,6 @@
 
 module Ivory.QuickCheck (check, checkWith, contract) where
 
-import           Prelude                         ()
-import           Prelude.Compat
-
 import           Control.Monad                   (forM, replicateM)
 import           Data.IORef                      (IORef, newIORef, readIORef,
                                                   writeIORef)
@@ -62,9 +59,6 @@ import qualified Test.QuickCheck.Gen             as G
 
 import           Data.Int
 import           Data.Word
-
--- XXX: DEBUG
--- import Debug.Trace
 
 -- | Generate a random C program to check that the property holds. The
 -- generated program will be placed in the @test@ subdirectory.
