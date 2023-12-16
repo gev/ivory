@@ -12,8 +12,7 @@ module Ivory.Serialize.Atoms
   , Packable(..)
   ) where
 
-import Prelude ()
-import Prelude.Compat hiding ((!!))
+import Prelude hiding ((!!))
 
 import Ivory.Language
 import qualified Ivory.Language.Array as I

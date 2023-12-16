@@ -28,7 +28,6 @@ library
                         Paths_ivory_serialize
 
   build-depends:        base >= 4.7 && < 5,
-                        base-compat,
                         filepath,
                         monadLib,
                         ivory,
