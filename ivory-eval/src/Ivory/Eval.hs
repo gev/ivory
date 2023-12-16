@@ -26,15 +26,53 @@ module Ivory.Eval
   , evalStmt
   ) where
 
-import           Prelude                                 ()
-import           Prelude.Compat                          hiding (and, div, mod,
-                                                          negate, not, or)
-import qualified Prelude.Compat                          as Prelude
-
+import Prelude
+  ( Bool(..)
+  , Char
+  , Double
+  , Either
+  , Eq
+  , Float
+  , Integer
+  , Monad
+  , MonadFail
+  , Num
+  , Ord
+  , String
+  , Show(..)
+  , (.)
+  , ($)
+  , (<$>)
+  , (>>)
+  , (==)
+  , (/=)
+  , (<)
+  , (>)
+  , (<=)
+  , (>=)
+  , (&&)
+  , (||)
+  , (+)
+  , (-)
+  , (*)
+  , (/)
+  , (++)
+  , error
+  , fmap
+  , fst
+  , fromInteger
+  , fromIntegral
+  , mapM
+  , mapM_
+  , otherwise
+  , repeat
+  , take
+  , toInteger
+  , toEnum
+  , return
+  )
+import qualified Prelude
 import           Control.Monad                           (foldM, unless, void)
-#if MIN_VERSION_base_compat(0,10,0)
-import qualified Control.Monad.Fail.Compat as Fail
-#endif
 import           Data.Int
 import qualified Data.Map                                as Map
 import           Data.Maybe
@@ -49,16 +87,11 @@ import           MonadLib                                (ExceptionM (..),
                                                           runExceptionT, runId,
                                                           runStateT, sets_)
 
--- XXX: DEBUG
--- import Debug.Trace
-
 type Error  = String
 type Eval a = StateT EvalState (ExceptionT Error Id) a
 
-#if MIN_VERSION_base_compat(0,10,0)
-instance {-# OVERLAPS #-} Fail.MonadFail (StateT EvalState (ExceptionT Error Id)) where
+instance {-# OVERLAPS #-} MonadFail (StateT EvalState (ExceptionT Error Id)) where
   fail = raise
-#endif
 
 runEval :: Eval a -> Either Error a
 runEval doThis = fmap fst (runEvalStartingFrom (initState Map.empty) doThis)

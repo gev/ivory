@@ -8,9 +8,6 @@
 
 module Main where
 
-import Prelude ()
-import Prelude.Compat
-
 import Ivory.Language
 import Ivory.Language.Monad
 
