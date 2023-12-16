@@ -60,18 +60,20 @@ shouldFail = testGroup "should be unsafe"
              ]
 
 mkSuccess :: Def (args ':-> res) -> Module -> TestTree
-mkSuccess d@(~(I.DefProc p)) m = testCase (I.procSym p) $ do
+mkSuccess d@(I.DefProc p) m = testCase (I.procSym p) $ do
   (o, r) <- quickCheck d m
   assertBool ("Expected quickcheck to pass: output:\n" ++ o) r
+mkSuccess x _ = error $ "Expected I.DefProc but got " <> show x
 
 mkFailure :: Def (args ':-> res) -> Module -> TestTree
-mkFailure d@(~(I.DefProc p)) m = testCase (I.procSym p) $ do
+mkFailure d@(I.DefProc p) m = testCase (I.procSym p) $ do
   (o, r) <- quickCheck d m
   assertBool ("Expected quickcheck to fail: output:\n" ++ o) (not r)
+mkFailure x _ = error $ "Expected I.DefProc but got " <> show x
 
 
 quickCheck :: Def (args ':-> res) -> Module -> IO (String, Bool)
-quickCheck d@(~(I.DefProc p)) m = do
+quickCheck d@(I.DefProc p) m = do
   tmpDir <- getTemporaryDirectory
   let testDir = tmpDir </> "ivory-quickcheck" </> I.procSym p
   b <- doesDirectoryExist testDir
@@ -83,6 +85,7 @@ quickCheck d@(~(I.DefProc p)) m = do
   out <- hGetContents oh
   err <- hGetContents eh
   return (out ++ "\n" ++ err, code == ExitSuccess)
+quickCheck x _ = error $ "Expected I.DefProc but got " <> show x
 
 --------------------------------------------------------------------------------
 -- test modules

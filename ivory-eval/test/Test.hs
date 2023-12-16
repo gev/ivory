@@ -29,17 +29,21 @@ tests = testGroup "Tests" [ sumTest, assertTest ]
 
 sumTest :: TestTree
 sumTest = testCase "sum" $ do
-  let Right (_, EvalState st _ _)
+  let eres
         = runEvalStartingFrom (initState mempty)
         $ evalBlock $ blockStmts $ snd $ runIvory $ do
             r <- local (izero :: Init ('Stored Sint32))
             11 `times` \(i :: Ix 12) -> do -- sum [ 10 .. 0 ]
               v <- deref r
               store r (v + safeCast i)
-  assertEqual "wrong state!"
-    (Map.fromList [ ("local0", Sint32 55), ("deref3", Sint32 54)
-                  , ("ix2", Sint32 0), ("ref1", Ref "local0")]) 
-    st
+
+  case eres of
+    Right (_, EvalState st _ _) -> do
+      assertEqual "wrong state!"
+        (Map.fromList [ ("local0", Sint32 55), ("deref3", Sint32 54)
+                      , ("ix2", Sint32 0), ("ref1", Ref "local0")]) 
+        st
+    Left x -> fail $ "Eval failed with" <> show x
 
 assertTest :: TestTree
 assertTest = testCase "assert" $ do
