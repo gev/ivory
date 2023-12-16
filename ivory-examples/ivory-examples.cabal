@@ -1,3 +1,4 @@
+cabal-version:       2.2
 name:                ivory-examples
 version:             0.1.0.5
 author:              Galois, Inc
@@ -8,13 +9,12 @@ synopsis:            Ivory examples.
 description:         Various examples demonstrating the use of Ivory.
 homepage:            http://ivorylang.org/
 build-type:          Simple
-cabal-version:       >= 1.10
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 data-files:          examples/file.ivory
 source-repository    this
   type:     git
-  location: https://github.com/GaloisInc/ivory
+  location: https://github.com/distrap/ivory
   tag:      hackage-0.1.0.4
 
 executable ivory-c-clang-test
