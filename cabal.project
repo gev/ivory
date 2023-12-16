@@ -3,6 +3,7 @@ packages:
   ivory-artifact
   ivory-backend-c
   ivory-eval
+  ivory-examples
   ivory-hw
   ivory-model-check
   ivory-opts
