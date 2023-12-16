@@ -6,11 +6,6 @@
 -- RuntimeCast.
 {-# LANGUAGE UndecidableInstances #-}
 
-{-# LANGUAGE CPP #-}
-#if __GLASGOW_HASKELL__ < 710
-{-# LANGUAGE OverlappingInstances #-}
-#endif
-
 -- | Safe casting.  We assume Floats have 32 bits and Doubles have 64.
 
 module Ivory.Language.Cast
@@ -199,10 +194,7 @@ instance SafeCast IChar IChar     where
 -- Runtime check instances.
 
 -- All other casts, for going to a Num type.
-instance
-#if __GLASGOW_HASKELL__ >= 710
-    {-# OVERLAPPABLE #-}
-#endif
+instance {-# OVERLAPPABLE #-}
          ( Bounded   from, Bounded   to
          , IvoryOrd  from, IvoryOrd  to
          , IvoryExpr from, IvoryExpr to

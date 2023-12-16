@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP             #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -10,15 +9,8 @@ import           Ivory.Language.Syntax.Type
 
 import           Language.Haskell.TH.Lift                (deriveLiftMany)
 
-#if __GLASGOW_HASKELL__ < 709
-import           Language.Haskell.TH.Syntax              (Lift (..))
-#endif
-
 import           Data.Ratio                              (denominator,
                                                           numerator)
-#if !MIN_VERSION_base(4,11,0)
-import           Data.Semigroup                          (Semigroup(..))
-#endif
 
 -- Modules ---------------------------------------------------------------------
 
@@ -471,11 +463,3 @@ deriveLiftMany
   , ''Stmt, ''LoopIncr, ''Comment, ''SrcLoc, ''Range, ''Position
   , ''Expr, ''ExpOp, ''Literal, ''Init
   ]
-
-#if __GLASGOW_HASKELL__ < 709
-instance Lift Double where
-  lift = lift . toRational
-
-instance Lift Float where
-  lift = lift . toRational
-#endif
