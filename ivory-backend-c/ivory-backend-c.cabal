@@ -35,7 +35,7 @@ library
   build-depends:        base >= 4.7 && < 5,
                         language-c-quote >= 0.13,
                         srcloc,
-                        mainland-pretty >= 0.2.5,
+                        mainland-pretty >= 0.6,
                         monadLib >= 3.7,
                         directory,
                         filepath,
