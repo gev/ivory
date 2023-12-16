@@ -1,0 +1,35 @@
+package ivory
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-artifact
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-backend-c
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-eval
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-examples
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-hw
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-model-check
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-opts
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-quickcheck
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-serialize
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-stdlib
+    ghc-options: -Wall -Werror -Wunused-packages
+
+package ivory-tasty
+    ghc-options: -Wall -Werror -Wunused-packages
