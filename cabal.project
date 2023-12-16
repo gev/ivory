@@ -11,3 +11,9 @@ packages:
   ivory-serialize
   ivory-stdlib
   ivory-tasty
+
+-- until next release but only due to warnings and strict CI
+source-repository-package
+  type: git
+  location: https://github.com/mainland/language-c-quote
+  tag: a27ebb2fa84aa6a378bcbf244a156c58fe86df5d
