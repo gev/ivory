@@ -36,8 +36,6 @@ test-suite test
   other-modules:  Types
   ghc-options:    -Wall
   build-depends:  base >= 4.6 && < 5
-               ,  tasty >= 0.10
-               ,  tasty-hunit
                ,  ivory
                ,  ivory-tasty
                ,  ivory-stdlib
