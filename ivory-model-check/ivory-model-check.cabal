@@ -33,7 +33,6 @@ test-suite test
                ,  tasty >= 0.10
                ,  tasty-hunit
                ,  monadLib
-               ,  QuickCheck
                ,  ivory
                ,  ivory-backend-c
                ,  ivory-model-check
