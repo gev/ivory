@@ -36,7 +36,6 @@ test-suite test
                , containers
                , tasty >= 0.10
                , tasty-hunit
-               , monadLib
                , ivory
                , ivory-eval
 
