@@ -5,9 +5,6 @@ module Ivory.Compile.C.Modules where
 
 import           Paths_ivory_backend_c     (version)
 
-import           Prelude                   ()
-import           Prelude.Compat
-
 import           Text.PrettyPrint.Mainland
 #if MIN_VERSION_mainland_pretty(0,6,0)
 import           Text.PrettyPrint.Mainland.Class

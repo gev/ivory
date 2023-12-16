@@ -1,17 +1,10 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PackageImports             #-}
 {-# LANGUAGE QuasiQuotes                #-}
 
 module Ivory.Compile.C.Types where
 
-import           Prelude              ()
-import           Prelude.Compat
-
 import           Data.List            (nub)
-#if !MIN_VERSION_base(4,11,0)
-import           Data.Semigroup       (Semigroup(..))
-#endif
 
 import           Language.C.Quote.GCC
 import qualified "language-c-quote" Language.C.Syntax    as C
