@@ -7,9 +7,6 @@
 
 module FibLoop where
 
-import Prelude ()
-import Prelude.Compat
-
 import Ivory.Compile.C.CmdlineFrontend
 import Ivory.Language
 

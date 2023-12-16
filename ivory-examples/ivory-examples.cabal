@@ -47,7 +47,6 @@ executable ivory-c-clang-test
                       , String
   hs-source-dirs:       examples
   build-depends:        base >= 4.7 && < 5,
-                        base-compat,
                         pretty >= 1.1,
                         monadLib >= 3.7,
                         template-haskell >= 2.8,
