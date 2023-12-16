@@ -21,9 +21,6 @@ module Ivory.Opts.CFG
   )
     where
 
-import Prelude ()
-import Prelude.Compat hiding (lookup)
-
 import qualified Ivory.Language.Array       as I
 import qualified Ivory.Language.Syntax.AST  as I
 import qualified Ivory.Language.Syntax.Type as I
@@ -237,13 +234,13 @@ cfg m = G.insEdges (concatMap go nodes) $ G.insNodes nodes G.empty
   go :: (Int, ProcInfo) -> [G.LEdge ()]
   go (i,p) =
     let outCalls = concatMap flattenControl (calls p) in
-    let outIdxs  = catMaybes (map (lookup nodes) outCalls) in
+    let outIdxs  = catMaybes (map (lookupNode nodes) outCalls) in
     zip3 (repeat i) outIdxs (repeat ()) -- outboud edges
 
-  lookup ls sym | [] <- ls         = Nothing
-                | ((i,p):_) <- ls
-                , procSym p == sym = Just i
-                | (_:ls') <- ls    = lookup ls' sym
+  lookupNode ls sym | [] <- ls         = Nothing
+                    | ((i,p):_) <- ls
+                    , procSym p == sym = Just i
+                    | (_:ls') <- ls    = lookupNode ls' sym
 
 -- | Just label the nodes with the function names.
 procSymGraph :: CFG -> G.Gr CallNm ()

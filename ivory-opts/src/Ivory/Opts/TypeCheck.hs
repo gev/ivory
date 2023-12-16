@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP                        #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
@@ -19,9 +18,6 @@ module Ivory.Opts.TypeCheck
   , existWarnOrErrors
   , existErrors
   ) where
-
-import           Prelude                                 ()
-import           Prelude.Compat                          hiding (init)
 
 import           Control.Monad                           (unless, void, when)
 import           Data.List                               (nub)
@@ -221,8 +217,8 @@ tyChk ty        stmts = void (tyChk' (False, False) stmts)
 -- are a field of a struct) because we don't have the typing information with
 -- the array length in the AST; it's not part of the initializer. We could add it, though.
 checkInit :: Maybe I.Type -> I.Init -> TCResults ()
-checkInit mty init =
-  case init of
+checkInit mty ini =
+  case ini of
     I.InitZero
       -> return ()
     I.InitExpr{}

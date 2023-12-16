@@ -13,9 +13,6 @@ module Ivory.Opts.AssertFold
   , freshVar
   ) where
 
-import           Prelude                    ()
-import           Prelude.Compat
-
 import qualified Data.DList                 as D
 import qualified Ivory.Language.Array       as I
 import qualified Ivory.Language.Syntax.AST  as I

@@ -35,7 +35,6 @@ library
   other-modules:        Ivory.Opts.Utils
 
   build-depends:        base >= 4.7 && < 5,
-                        base-compat,
                         containers,
                         data-reify >=0.6,
                         dlist >= 0.5,
