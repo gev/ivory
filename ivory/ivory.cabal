@@ -10,6 +10,7 @@ homepage:            http://ivorylang.org
 build-type:          Simple
 license:             BSD-3-Clause
 license-file:        LICENSE
+extra-doc-files:     CHANGELOG.md
 source-repository    this
   type:     git
   location: https://github.com/distrap/ivory
