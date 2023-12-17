@@ -31,7 +31,6 @@ import           MonadLib                                (Id, StateM (..),
                                                           WriterT, runId,
                                                           runStateT, runWriterT,
                                                           sets_)
-import           System.IO                               (hPutStrLn, stderr)
 import           Text.PrettyPrint                        hiding ((<>))
 
 import qualified Ivory.Language.Array                    as I

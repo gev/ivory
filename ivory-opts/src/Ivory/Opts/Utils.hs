@@ -45,7 +45,7 @@ showModErrs doc (ModResult m errs) =
   case errs of
     [] -> empty
     _  ->
-         text "***" <+> text "Module" <+> text m <> colon
+         text "***" <+> text "Module" <+> (text m <> colon)
       $$ nest 2 (vcat (map (showSymErrs doc) errs))
 
 -- Show the errors for a symbol (area or procedure).
