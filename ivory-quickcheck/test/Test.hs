@@ -59,20 +59,20 @@ shouldFail = testGroup "should be unsafe"
              , mkFailure foo14 m14
              ]
 
-mkSuccess :: Def (args ':-> res) -> Module -> TestTree
+mkSuccess :: Def (args :-> res) -> Module -> TestTree
 mkSuccess d@(I.DefProc p) m = testCase (I.procSym p) $ do
   (o, r) <- quickCheck d m
   assertBool ("Expected quickcheck to pass: output:\n" ++ o) r
 mkSuccess x _ = error $ "Expected I.DefProc but got " <> show x
 
-mkFailure :: Def (args ':-> res) -> Module -> TestTree
+mkFailure :: Def (args :-> res) -> Module -> TestTree
 mkFailure d@(I.DefProc p) m = testCase (I.procSym p) $ do
   (o, r) <- quickCheck d m
   assertBool ("Expected quickcheck to fail: output:\n" ++ o) (not r)
 mkFailure x _ = error $ "Expected I.DefProc but got " <> show x
 
 
-quickCheck :: Def (args ':-> res) -> Module -> IO (String, Bool)
+quickCheck :: Def (args :-> res) -> Module -> IO (String, Bool)
 quickCheck d@(I.DefProc p) m = do
   tmpDir <- getTemporaryDirectory
   let testDir = tmpDir </> "ivory-quickcheck" </> I.procSym p
@@ -90,7 +90,7 @@ quickCheck x _ = error $ "Expected I.DefProc but got " <> show x
 --------------------------------------------------------------------------------
 -- test modules
 
-foo1 :: Def ('[Ix 10, Ix 10] ':-> ())
+foo1 :: Def ('[Ix 10, Ix 10] :-> ())
 foo1 = L.proc "foo1" $ \y x -> body $ do
   ifte_ (y <? 3)
     (do ifte_ (y ==? 3)
@@ -106,7 +106,7 @@ m1 = package "foo1" (incl foo1)
 
 -----------------------
 
-foo6 :: Def ('[Uint8] ':-> ())
+foo6 :: Def ('[Uint8] :-> ())
 foo6 = L.proc "foo6" $ \x -> body $ do
   y <- local (ival (0 :: Uint8))
   ifte_ (x <? 3)
@@ -127,7 +127,7 @@ m6 = package "foo6" (incl foo6)
 
 -----------------------
 
-foo7 :: Def ('[Uint8, Uint8] ':-> Uint8)
+foo7 :: Def ('[Uint8, Uint8] :-> Uint8)
 foo7 = L.proc "foo7" $ \x y ->
        requires (x + y <=? 255)
      $ body $ do
@@ -138,7 +138,7 @@ m7 = package "foo7" (incl foo7)
 
 -----------------------
 
-foo8 :: Def ('[Uint8] ':-> Uint8)
+foo8 :: Def ('[Uint8] :-> Uint8)
 foo8 = L.proc "foo8" $ \x -> body $ do
   let y = x .% 3
   L.assert (y <? 4)
@@ -156,7 +156,7 @@ struct foo2
 }
 |]
 
-foo9 :: Def ('[Ref s ('L.Struct "foo2")] ':-> ())
+foo9 :: Def ('[Ref s ('L.Struct "foo2")] :-> ())
 foo9 = L.proc "foo9" $ \f -> body $ do
   st <- local (istruct [aFoo .= ival 0])
   a  <- deref (st ~> aFoo)
@@ -175,7 +175,7 @@ m9 = package "foo9" $ do
 
 -----------------------
 
-foo10 :: Def ('[Uint8] ':-> Uint8)
+foo10 :: Def ('[Uint8] :-> Uint8)
 foo10 = L.proc "foo10" $ \x ->
         requires (x <? 10)
       $ ensures (\r -> r ==? x + 1)
@@ -188,7 +188,7 @@ m10 = package "foo10" (incl foo10)
 
 -----------------------
 
-foo11 :: Def ('[Ix 10] ':-> ())
+foo11 :: Def ('[Ix 10] :-> ())
 foo11 = L.proc "foo11" $ \n ->
           requires (n >=? 0)
         $ body $ do
@@ -202,7 +202,7 @@ m11 = package "foo11" (incl foo11)
 
 -----------------------
 
-foo12 :: Def ('[Uint8] ':-> Uint8)
+foo12 :: Def ('[Uint8] :-> Uint8)
 foo12 = L.proc "foo12" $ \n ->
         ensures (\r -> r ==? n)
       $ body $ do
@@ -216,7 +216,7 @@ m12 = package "foo12" (incl foo12)
 
 -----------------------
 
-foo13 :: Def ('[Uint8, Uint8] ':-> Uint8)
+foo13 :: Def ('[Uint8, Uint8] :-> Uint8)
 foo13 = L.proc "foo13" $ \x y ->
         requires (x <=? 15)
       $ requires (y <=? 15)
@@ -227,7 +227,7 @@ m13 = package "foo13" (incl foo13)
 
 -----------------------
 
-foo14 :: Def ('[Uint8, Uint8] ':-> Uint8)
+foo14 :: Def ('[Uint8, Uint8] :-> Uint8)
 foo14 = L.proc "foo14" $ \x y ->
         ensures (\r -> r >=? x L..&& r >=? y) $
         body $ ret (x * y)
@@ -237,7 +237,7 @@ m14 = package "foo14" (incl foo14)
 
 -----------------------
 
-foo15 :: Def ('[Ix 10] ':-> Uint8)
+foo15 :: Def ('[Ix 10] :-> Uint8)
 foo15 = L.proc "foo15" $ \n ->
     requires (n >=? 0)
   $ ensures (\r -> r <=? 5)
@@ -251,7 +251,7 @@ m15 = package "foo15" (incl foo15)
 
 -----------------------
 
-foo17 :: Def ('[ Ref 'Global ('Array 10 ('Stored Uint32))] ':-> ())
+foo17 :: Def ('[ Ref 'Global ('Array 10 ('Stored Uint32))] :-> ())
 foo17 = L.proc "foo17" $ \a -> body $ do
   b <- local (iarray [ival 0, ival 1])
   refCopy b a
@@ -263,7 +263,7 @@ m17 = package "foo17" (incl foo17)
 
 -----------------------
 
-foo18 :: Def ('[Ref s ('L.Struct "foo2")] ':-> Ref s ('L.Struct "foo2"))
+foo18 :: Def ('[Ref s ('L.Struct "foo2")] :-> Ref s ('L.Struct "foo2"))
 foo18 = L.proc "foo18" $ \f ->
     requires (checkStored (f ~> aFoo) (\a -> a >? 0))
   $ requires (checkStored (f ~> aFoo) (\a -> a <? 10))
@@ -285,7 +285,7 @@ m18 = package "foo18" $ do
 ppm_valid_area :: MemArea ('Stored IBool)
 ppm_valid_area = area "ppm_valid" Nothing
 
-foo19 :: Def('[Ref s ('Array 1 ('Stored Uint32))] ':-> ())
+foo19 :: Def('[Ref s ('Array 1 ('Stored Uint32))] :-> ())
 foo19 = L.proc "foo19" $ \ppms -> body $ do
   all_good <- local (ival L.true)
   ppm_last <- local (iarray [])
@@ -300,7 +300,7 @@ foo19 = L.proc "foo19" $ \ppms -> body $ do
   L.when b $ do
     (arrayMap $ \ix -> (deref (ppms ! ix) >>= store (ppm_last ! ix)))
     store ppm_valid L.true
-  
+
   valid <- deref ppm_valid
   ppm <- deref (ppm_last ! 0)
   L.assert (L.iNot valid .|| (ppm >=? 800 L..&& ppm <=? 2000))

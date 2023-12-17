@@ -22,7 +22,6 @@ import Data.Char (ord, toLower)
 import Ivory.Language
 import Ivory.Language.Array (IxRep)
 import Ivory.Artifact
-import Ivory.Language.Struct
 
 import qualified Control.Monad as M
 import qualified Paths_ivory_stdlib as P
@@ -115,35 +114,27 @@ stringArray = map (fromIntegral . ord)
 ----------------------------------------------------------------------
 -- Generic Functions
 
-stringCapacity :: ( IvoryString str
-                  , IvoryRef ref
-                  , IvoryExpr (ref s ('Struct (StructName str)))
-                  , IvoryExpr (ref s ('Array (Capacity ('Struct (StructName str))) ('Stored Uint8)))
-                  , Num n
-                  )
-               => ref s str -> n
+stringCapacity :: (IvoryString str, Num n, KnownConstancy c)
+               => Pointer 'Valid c s str -> n
 stringCapacity str = arrayLen (str ~> stringDataL)
 
-stringData :: ( IvoryString str
-              , IvoryRef ref
-              , IvoryExpr (ref s ('Array (Capacity str) ('Stored Uint8)))
-              , IvoryExpr (ref s ('CArray ('Stored Uint8)))
-              , IvoryExpr (ref s str))
-           => ref s str -> ref s ('CArray ('Stored Uint8))
+stringData :: (IvoryString str, KnownConstancy c)
+           => Pointer 'Valid c s str
+           -> Pointer 'Valid c s ('CArray ('Stored Uint8))
 stringData x = toCArray (x ~> stringDataL)
 
 -- XXX don't export
 -- | Binding to the C "memcmp" function.
 memcmp :: Def ('[ ConstRef s1 ('CArray ('Stored Uint8))
                 , ConstRef s2 ('CArray ('Stored Uint8))
-                , Len] ':-> Len)
+                , Len] :-> Len)
 memcmp = importProc "memcmp" "string.h"
 
 -- XXX don't export
 -- | Binding to the C "memcpy" function.
 memcpy :: Def ('[ Ref      s1 ('CArray ('Stored Uint8))
                 , ConstRef s2 ('CArray ('Stored Uint8))
-                , Len] ':-> Len)
+                , Len] :-> Len)
 memcpy = importProc "memcpy" "string.h"
 
 -- | Return the length of a string.
@@ -167,8 +158,8 @@ do_istr_eq :: Def ('[ ConstRef s1 ('CArray ('Stored Uint8))
                     , Len
                     , ConstRef s2 ('CArray ('Stored Uint8))
                     , Len
-                    ] ':-> IBool)
-do_istr_eq = proc "ivory_string_eq" $ \s1 len1 s2 len2 -> body $ do
+                    ] :-> IBool)
+do_istr_eq = proc "ivory_string_eq" $ \s1 len1 s2 len2 -> body $
   ifte_ (len1 ==? len2)
     (do r <- call memcmp s1 s2 len1
         ret (r ==? 0))
@@ -192,7 +183,7 @@ istr_eq s1 s2 = do
 string_copy_z :: Def ('[ Ref s1 ('CArray ('Stored Uint8))
                        , Len
                        , ConstRef s2 ('CArray ('Stored Uint8))
-                       , Len] ':-> Len)
+                       , Len] :-> Len)
 string_copy_z = importProc "ivory_stdlib_string_copy_z"
                            "ivory_stdlib_string_prim.h"
 
@@ -251,4 +242,3 @@ stdlibStringArtifacts =
   ]
   where
   supportfile f = artifactCabalFile P.getDataDir ("support/" ++ f)
-

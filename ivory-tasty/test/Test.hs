@@ -22,20 +22,20 @@ main = defaultMain $ ivoryTestGroup [uartTypes] []
   , setDeps (depend uartTypes) $ mkSuccess "test with dependencies" testDeps
   ]
 
-testSmoke :: Def ('[] ':-> Sint32)
+testSmoke :: Def ('[] :-> Sint32)
 testSmoke = proc "main" $ body $ do
   ret 0
 
-testSmokeFailing :: Def ('[] ':-> Sint32)
+testSmokeFailing :: Def ('[] :-> Sint32)
 testSmokeFailing = proc "main" $ body $ do
   ret 1
 
-testAssertFailing :: Def ('[] ':-> Sint32)
+testAssertFailing :: Def ('[] :-> Sint32)
 testAssertFailing = proc "main" $ body $ do
   assert false
   ret 0
 
-testDeps :: Def ('[] ':-> Sint32)
+testDeps :: Def ('[] :-> Sint32)
 testDeps = proc "main" $ body $ do
   (a :: Ref s UARTBuffer) <- local $ stringInit "yolo"
   lA <- deref (a ~> stringLengthL)

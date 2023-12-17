@@ -16,7 +16,7 @@
 -- > someArtifacts :: [Located Artifact]
 -- > someArtifacts = serializeArtifacts
 --
--- > someTestedFunction :: Def ('[] ':-> Sint32)
+-- > someTestedFunction :: Def ('[] :-> Sint32)
 -- > someTestedFunction = proc "main" $ body $ do
 -- >   assert false
 -- >   ret 0
@@ -68,7 +68,7 @@ import           Test.Tasty.HUnit (assertBool, testCase)
 
 data IvoryTestCase = IvoryTestCase {
     itcName          :: String
-  , itcFun           :: Def ('[] ':-> Sint32)
+  , itcFun           :: Def ('[] :-> Sint32)
   , itcDeps          :: ModuleDef
   , itcExpectSuccess :: Bool
   }
@@ -77,7 +77,7 @@ data IvoryTestCase = IvoryTestCase {
 -- expecting 0 exit code.
 mkSuccess
   :: String
-  -> Def ('[] ':-> Sint32)
+  -> Def ('[] :-> Sint32)
   -> IvoryTestCase
 mkSuccess name f = IvoryTestCase name f (pure ()) True
 
@@ -85,7 +85,7 @@ mkSuccess name f = IvoryTestCase name f (pure ()) True
 -- expecting non-0 exit code.
 mkFailure
   :: String
-  -> Def ('[] ':-> Sint32)
+  -> Def ('[] :-> Sint32)
   -> IvoryTestCase
 mkFailure name f = IvoryTestCase name f (pure ()) False
 

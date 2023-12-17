@@ -113,7 +113,7 @@ mkNotError _ _ = error "Absurd"
 --------------------------------------------------------------------------------
 -- test modules
 
-foo1 :: Def ('[Uint8, Uint8] ':-> ())
+foo1 :: Def ('[Uint8, Uint8] :-> ())
 foo1 = L.proc "foo1" $ \y x -> body $ do
   ifte_ (y <? 3)
     (do ifte_ (y ==? 3)
@@ -129,7 +129,7 @@ m1 = package "foo1" (incl foo1)
 
 -----------------------
 
-foo2 :: Def ('[] ':-> ())
+foo2 :: Def ('[] :-> ())
 foo2 = L.proc "foo2" $ body $ do
   x <- local (ival (0 :: Uint8))
   store x 3
@@ -143,7 +143,7 @@ m2 = package "foo2" (incl foo2)
 
 -----------------------
 
-foo3 :: Def ('[] ':-> ())
+foo3 :: Def ('[] :-> ())
 foo3 = L.proc "foo3" $ body $ do
   x <- local (ival (1 :: Sint32))
   -- since ivory loops are bounded, we can just unroll the whole thing!
@@ -157,7 +157,7 @@ m3 = package "foo3" (incl foo3)
 
 -----------------------
 
-foo4 :: Def ('[] ':-> ())
+foo4 :: Def ('[] :-> ())
 foo4 = L.proc "foo4" $ body $ do
   x <- local (ival (1 :: Sint32))
   -- store x (7 .% 2)
@@ -172,7 +172,7 @@ m4 = package "foo4" (incl foo4)
 
 -----------------------
 
-foo5 :: Def ('[] ':-> ())
+foo5 :: Def ('[] :-> ())
 foo5 = L.proc "foo5" $ body $ do
   x <- local (ival (1 :: Sint32))
   -- for loops from 0 to n-1, inclusive
@@ -188,7 +188,7 @@ m5 = package "foo5" (incl foo5)
 
 -----------------------
 
-foo6 :: Def ('[Uint8] ':-> ())
+foo6 :: Def ('[Uint8] :-> ())
 foo6 = L.proc "foo6" $ \x -> body $ do
   y <- local (ival (0 :: Uint8))
   ifte_ (x <? 3)
@@ -209,7 +209,7 @@ m6 = package "foo6" (incl foo6)
 
 -----------------------
 
-foo7 :: Def ('[Uint8, Uint8] ':-> Uint8)
+foo7 :: Def ('[Uint8, Uint8] :-> Uint8)
 foo7 = L.proc "foo7" $ \x y ->
        requires (x + y <=? 255)
      $ body $ do
@@ -220,7 +220,7 @@ m7 = package "foo7" (incl foo7)
 
 -----------------------
 
-foo8 :: Def ('[Uint8] ':-> Uint8)
+foo8 :: Def ('[Uint8] :-> Uint8)
 foo8 = L.proc "foo8" $ \x -> body $ do
   let y = x .% 3
   L.assert (y <? 4)
@@ -238,7 +238,7 @@ struct foo2
 }
 |]
 
-foo9 :: Def ('[Ref s ('L.Struct "foo2")] ':-> ())
+foo9 :: Def ('[Ref s ('L.Struct "foo2")] :-> ())
 foo9 = L.proc "foo9" $ \f -> body $ do
   st <- local (istruct [aFoo .= ival 0])
   a  <- deref (st ~> aFoo)
@@ -257,7 +257,7 @@ m9 = package "foo9" $ do
 
 -----------------------
 
-foo10 :: Def ('[Uint8] ':-> Uint8)
+foo10 :: Def ('[Uint8] :-> Uint8)
 foo10 = L.proc "foo10" $ \x ->
         requires (x <? 10)
       $ ensures (\r -> r ==? x + 1)
@@ -270,7 +270,7 @@ m10 = package "foo10" (incl foo10)
 
 -----------------------
 
-foo11 :: Def ('[Ix 10] ':-> ())
+foo11 :: Def ('[Ix 10] :-> ())
 foo11 = L.proc "foo11" $ \n ->
           requires (n >=? 1)
         $ body $ do
@@ -284,7 +284,7 @@ m11 = package "foo11" (incl foo11)
 
 -----------------------
 
-foo12 :: Def ('[Uint8] ':-> Uint8)
+foo12 :: Def ('[Uint8] :-> Uint8)
 foo12 = L.proc "foo12" $ \n ->
         ensures (\r -> r ==? n)
       $ body $ do
@@ -298,7 +298,7 @@ m12 = package "foo12" (incl foo12)
 
 -----------------------
 
-foo13 :: Def ('[Uint8, Uint8] ':-> Uint8)
+foo13 :: Def ('[Uint8, Uint8] :-> Uint8)
 foo13 = L.proc "foo13" $ \x y ->
         requires (x <=? 15)
       $ requires (y <=? 15)
@@ -309,7 +309,7 @@ m13 = package "foo13" (incl foo13)
 
 -----------------------
 
-foo14 :: Def ('[Uint8, Uint8] ':-> Uint8)
+foo14 :: Def ('[Uint8, Uint8] :-> Uint8)
 foo14 = L.proc "foo14" $ \x y ->
         body $ ret (x * y)
 
@@ -318,7 +318,7 @@ m14 = package "foo14" (incl foo14)
 
 -----------------------
 
-foo15 :: Def ('[Ix 10] ':-> Uint8)
+foo15 :: Def ('[Ix 10] :-> Uint8)
 foo15 = L.proc "foo15" $ \n ->
     requires (n >=? 1)
   $ ensures (\r -> r <=? 5)
@@ -331,7 +331,7 @@ m15 = package "foo15" (incl foo15)
 
 -----------------------
 
-foo16 :: Def ('[] ':-> ())
+foo16 :: Def ('[] :-> ())
 foo16 = L.proc "foo16" $ body $ do
   (stack_array :: Ref ('Stack s) ('Array 10 ('Stored IFloat))) <- local (iarray [])
   store (stack_array ! 0) 5
@@ -343,7 +343,7 @@ m16 = package "foo16" (incl foo16)
 
 -----------------------
 
-foo17 :: Def ('[ Ref 'Global ('Array 10 ('Stored Uint32))] ':-> ())
+foo17 :: Def ('[ Ref 'Global ('Array 10 ('Stored Uint32))] :-> ())
 foo17 = L.proc "foo17" $ \a -> body $ do
   b <- local (iarray [ival 0, ival 1])
   refCopy b a
@@ -355,7 +355,7 @@ m17 = package "foo17" (incl foo17)
 
 -----------------------
 
-foo18 :: Def ('[Ref s ('L.Struct "foo2")] ':-> Ref s ('L.Struct "foo2"))
+foo18 :: Def ('[Ref s ('L.Struct "foo2")] :-> Ref s ('L.Struct "foo2"))
 foo18 = L.proc "foo18" $ \f -> 
     requires (checkStored (f ~> aFoo) (\a -> a >? 0))
   $ requires (checkStored (f ~> aFoo) (\a -> a <? 10))
@@ -377,7 +377,7 @@ m18 = package "foo18" $ do
 ppm_valid_area :: MemArea ('Stored IBool)
 ppm_valid_area = area "ppm_valid" Nothing
 
-foo19 :: Def('[Ref s ('Array 1 ('Stored Uint32))] ':-> ())
+foo19 :: Def('[Ref s ('Array 1 ('Stored Uint32))] :-> ())
 foo19 = L.proc "foo19" $ \ppms -> body $ do
   all_good <- local (ival L.true)
   ppm_last <- local (iarray [])

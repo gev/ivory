@@ -1,7 +1,8 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -13,7 +14,6 @@
 
 module Ivory.Language.Ref
   ( ConstRef
-  , IvoryRef
   , IvoryStore
   , Ref
   , constRef
@@ -37,8 +37,6 @@ import Ivory.Language.Scope
 import qualified Ivory.Language.Syntax as I
 import Ivory.Language.Type
 
-import Data.Kind (Type)
-
 -- References ------------------------------------------------------------------
 
 -- | A non-null pointer to a memory area.
@@ -55,19 +53,16 @@ type ConstRef = Pointer 'Valid 'Const
 
 -- Dereferencing ---------------------------------------------------------------
 
--- | TODO remove class, leave function only
-class IvoryRef (ref :: RefScope -> Area Type -> Type) where
-  unwrapRef
-    :: IvoryVar a
-    => ref s ('Stored a) -> I.Expr
-
-instance IvoryRef (Pointer 'Valid c) where
-  unwrapRef = getPointer
+unwrapRef
+  :: IvoryVar a
+  => Pointer 'Valid c s ('Stored a)
+  -> I.Expr
+unwrapRef = getPointer
 
 -- | Dereferenceing.
-deref :: forall eff ref s a.
-         (IvoryStore a, IvoryVar a, IvoryVar (ref s ('Stored a)), IvoryRef ref)
-      => ref s ('Stored a) -> Ivory eff a
+deref :: forall eff c s a.
+         (IvoryStore a, IvoryVar a)
+      => Pointer 'Valid c s ('Stored a) -> Ivory eff a
 deref ref = do
   r <- freshVar "deref"
   emit (I.Deref (ivoryType (Proxy :: Proxy a)) r (unwrapRef ref))
@@ -76,9 +71,9 @@ deref ref = do
 -- Copying ---------------------------------------------------------------------
 
 -- | Memory copy.  Emits an assertion that the two references are unequal.
-refCopy :: forall eff sTo ref sFrom a.
-     ( IvoryRef ref, IvoryVar (Ref sTo a), IvoryVar (ref sFrom a), IvoryArea a)
-  => Ref sTo a -> ref sFrom a -> Ivory eff ()
+refCopy :: forall eff sTo c sFrom a.
+     (IvoryArea a, KnownConstancy c)
+  => Ref sTo a -> Pointer 'Valid c sFrom a -> Ivory eff ()
 refCopy destRef srcRef =
   emit
     (I.RefCopy
@@ -109,5 +104,5 @@ instance IvoryStore Sint32
 instance IvoryStore Sint64
 
 -- Only allow global nullable pointers to be stored in structures.
-instance (KnownConstancy c, IvoryArea a) =>
-         IvoryStore (Pointer 'Nullable c 'Global a)
+instance (KnownConstancy c, IvoryArea a, n ~ 'Nullable, s ~ 'Global) =>
+         IvoryStore (Pointer n c s a)
