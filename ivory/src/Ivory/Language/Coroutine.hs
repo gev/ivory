@@ -135,7 +135,7 @@ coroutine :: forall a. IvoryArea a =>
 coroutine name (CoroutineBody fromYield) = Coroutine { .. }
   where
   ((), CodeBlock { blockStmts = rawCode }) =
-    runIvory $ fromYield $ call (proc yieldName $ body $ return ())
+    runIvory $ fromYield $ call fake
   -- The above call is a fake function call which code elsewhere extracts from
   -- the AST and replaces.
 
@@ -210,6 +210,10 @@ yieldName = "+yield"
 -- | Name of the variable used for the coroutine's current state.
 stateName :: String
 stateName = "state"
+
+-- | A fake function
+fake :: IvoryType t => Def ('[] :-> t)
+fake = proc yieldName $ body $ return ()
 
 -- | The type used for the continuation's state.
 stateType :: AST.Type
