@@ -7,6 +7,7 @@ module Ivory.Compile.C.CmdlineFrontend
   , runCompilerWith
   , Opts(..), parseOpts, printUsage
   , initialOpts
+  , CompilationError(..)
   , compileUnits
   , outputCompiler
   ) where
@@ -30,12 +31,10 @@ import qualified Ivory.Opts.SanityCheck                  as S
 import qualified Ivory.Opts.TypeCheck                    as T
 
 
-import           Control.Monad                           (when)
 import           Data.List                               (foldl', intercalate,
                                                           nub, (\\))
 import           Data.Maybe                              (catMaybes, mapMaybe)
-import           MonadLib                                (WriterM, put,
-                                                          runWriterT)
+import           MonadLib                                (put, runWriterT)
 import           System.Directory                        (createDirectoryIfMissing)
 import           System.Environment                      (getArgs)
 import           System.FilePath                         (addExtension, (</>))
@@ -61,11 +60,14 @@ runCompiler ms as os = runCompilerWith ms as os
 -- | Main compile function.
 runCompilerWith :: [Module] -> [Located Artifact] -> Opts -> IO ()
 runCompilerWith modules artifacts opts = do
-  (cmodules, errors) <- runWriterT $ compileUnits modules opts
+  (ecmodules, errors) <- compileUnits modules opts
   hPutStrLn stderr $ render $ vcat errors
-  if outProcSyms opts
-    then C.outputProcSyms modules
-    else outputCompiler cmodules artifacts opts
+  case ecmodules of
+    Left err -> error $ show err
+    Right cmodules ->
+      if outProcSyms opts
+        then C.outputProcSyms modules
+        else outputCompiler cmodules artifacts opts
 
 outputCompiler :: [C.CompileUnits] -> [Located Artifact] -> Opts -> IO ()
 outputCompiler cmodules artifacts opts
@@ -128,26 +130,51 @@ outputmodules opts cmodules user_artifacts = do
     where
     out = writeFile fname contents
 
+data CompilationError
+  = CompilationError_TypeCheck
+  | CompilationError_SanityCheck
+  deriving (Show, Eq)
+
 -- | Compile, type-check, and optimize modules, but don't generate C files.
-compileUnits :: WriterM m [Doc] => [Module] -> Opts -> m [C.CompileUnits]
+compileUnits
+  :: Monad m
+  => [Module]
+  -> Opts
+  -> m ( Either [CompilationError] [C.CompileUnits]
+       , [Doc]
+       )
 compileUnits modules opts = do
+  (fatalErrors, docs) <- runWriterT $ do
+    tcFatal <-
+      if tcErrors opts
+      then do
+        let ts = map T.typeCheck modules
+        let b = tcWarnings opts
+        mapM_ (\t -> put [T.showTyChkModule b t]) ts
+        if or (map T.existErrors ts)
+          then pure [ CompilationError_TypeCheck ]
+          else pure mempty
+      else
+        pure mempty
 
-  when (tcErrors opts) $ do
-    let ts = map T.typeCheck modules
-    let anyTs = or (map T.existErrors ts)
-    let b = tcWarnings opts
-    mapM_ (\t -> put [T.showTyChkModule b t]) ts
-    when anyTs (error "Type-checking failed!")
+    scFatal <-
+      if scErrors opts
+      then do
+        let ds = S.dupDefs modules
+        put [S.showDupDefs ds]
+        let ss = S.sanityCheck modules
+        mapM_ (\s -> put [S.showSanityChkModule s]) ss
+        if or (map S.existErrors ss)
+          then pure [ CompilationError_SanityCheck ]
+          else pure mempty
+      else
+        pure mempty
 
-  when (scErrors opts) $ do
-    let ds = S.dupDefs modules
-    put [S.showDupDefs ds]
-    let ss = S.sanityCheck modules
-    mapM_ (\s -> put [S.showSanityChkModule s]) ss
-    let anySs = or (map S.existErrors ss)
-    when anySs (error "Sanity-check failed!")
+    pure $ tcFatal <> scFatal
 
-  return (mkCUnits modules opts)
+  case fatalErrors of
+    [] -> pure $ (Right (mkCUnits modules opts), docs)
+    ers -> pure $ (Left ers, docs)
 
 mkCUnits :: [Module] -> Opts -> [C.CompileUnits]
 mkCUnits modules opts = cmodules
